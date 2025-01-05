@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Le fil d'Ariane</title>
+    <title>Chatbot CRD IFRASS</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
             display: flex;
             flex-direction: column;
+            justify-content: center;
             align-items: center;
         }
         #chat-box {
@@ -21,7 +22,6 @@
             padding: 10px;
             overflow-y: auto;
             margin-bottom: 10px;
-            background-color: #f9f9f9;
         }
         #chat-input {
             width: 100%;
@@ -45,35 +45,33 @@
     </style>
 </head>
 <body>
-    <h1>Le fil d'Ariane</h1>
+    <h1>Chatbot CRD IFRASS</h1>
     <div id="chat-box"></div>
     <input type="text" id="chat-input" placeholder="Posez votre question ici...">
     <button id="chat-submit">Envoyer</button>
 
     <script>
-        // URL de la base de connaissances JSON (hébergée sur Google Drive)
+        // URL de la base de connaissances JSON
         const baseKnowledgeURL = "https://drive.google.com/uc?export=download&id=1x3xv3dyyg617Vzy5yGht8SXZRqYZ1g_0";
 
-        // Clé API OpenAI
+        // Clé API OpenAI (Attention : remplacez par une clé régénérée)
         const apiKey = "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";
 
-        // Fonction pour charger la base de connaissances
+        // Charger la base de connaissances JSON
         async function loadBaseKnowledge() {
             try {
                 const response = await fetch(baseKnowledgeURL);
-                if (!response.ok) throw new Error(`Erreur HTTP : ${response.status}`);
-                const data = await response.json();
-                console.log("Base de connaissances chargée :", data);
-                return data;
+                if (!response.ok) throw new Error("Impossible de charger la base de connaissances.");
+                return await response.json();
             } catch (error) {
                 console.error("Erreur lors du chargement de la base de connaissances :", error);
                 return null;
             }
         }
 
-        // Fonction pour envoyer une question à OpenAI
+        // Poser une question à l'API OpenAI
         async function askChatGPT(question, baseKnowledge) {
-            const context = `Voici la base de connaissances : ${JSON.stringify(baseKnowledge)}. Répondez à cette question : ${question}`;
+            const context = `Voici les informations disponibles : ${JSON.stringify(baseKnowledge)}. Répondez à cette question : ${question}`;
             try {
                 const response = await fetch("https://api.openai.com/v1/chat/completions", {
                     method: "POST",
@@ -84,13 +82,12 @@
                     body: JSON.stringify({
                         model: "gpt-4",
                         messages: [
-                            { role: "system", content: "Vous êtes Le fil d'Ariane, un assistant du CRD IFRASS." },
+                            { role: "system", content: "Vous êtes un assistant pour le CRD de l'IFRASS." },
                             { role: "user", content: context }
                         ]
                     })
                 });
                 const data = await response.json();
-                console.log("Réponse OpenAI :", data);
                 return data.choices[0].message.content;
             } catch (error) {
                 console.error("Erreur lors de l'interaction avec OpenAI :", error);
@@ -108,21 +105,21 @@
                 return;
             }
 
-            // Ajouter la question de l'utilisateur au chat
+            // Ajouter la question au chat
             chatBox.innerHTML += `<p><strong>Vous :</strong> ${question}</p>`;
 
-            // Charger la base de connaissances et obtenir une réponse
+            // Charger la base de connaissances et poser la question
             const baseKnowledge = await loadBaseKnowledge();
             if (baseKnowledge) {
                 const response = await askChatGPT(question, baseKnowledge);
-                chatBox.innerHTML += `<p><strong>Le fil d'Ariane :</strong> ${response}</p>`;
+                chatBox.innerHTML += `<p><strong>Chatbot :</strong> ${response}</p>`;
             } else {
-                chatBox.innerHTML += `<p><strong>Le fil d'Ariane :</strong> Erreur lors du chargement de la base de connaissances.</p>`;
+                chatBox.innerHTML += `<p><strong>Chatbot :</strong> Erreur lors du chargement de la base de connaissances.</p>`;
             }
 
-            // Réinitialiser le champ de saisie
+            // Réinitialiser le champ d'entrée
             document.getElementById("chat-input").value = "";
-            chatBox.scrollTop = chatBox.scrollHeight; // Faire défiler vers le bas
+            chatBox.scrollTop = chatBox.scrollHeight; // Défilement vers le bas
         };
     </script>
 </body>
